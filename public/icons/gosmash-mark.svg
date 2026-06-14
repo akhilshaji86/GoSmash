@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="GoSmash">
+  <defs>
+    <radialGradient id="badge-glow" cx="68%" cy="24%" r="56%">
+      <stop offset="0" stop-color="#45d9f1" stop-opacity=".26" />
+      <stop offset=".48" stop-color="#14233a" stop-opacity=".92" />
+      <stop offset="1" stop-color="#07101e" />
+    </radialGradient>
+    <linearGradient id="badge-border" x1="6" x2="42" y1="5" y2="43">
+      <stop offset="0" stop-color="#c8ff2e" stop-opacity=".56" />
+      <stop offset=".56" stop-color="#45d9f1" stop-opacity=".3" />
+      <stop offset="1" stop-color="#263b58" stop-opacity=".7" />
+    </linearGradient>
+    <linearGradient id="cork-fill" x1="16" x2="33" y1="34" y2="40">
+      <stop offset="0" stop-color="#e8ff8a" />
+      <stop offset="1" stop-color="#c8ff2e" />
+    </linearGradient>
+    <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#000000" flood-opacity=".35" />
+    </filter>
+  </defs>
+
+  <rect width="48" height="48" fill="#07111f" />
+  <rect x="3.5" y="3.5" width="41" height="41" rx="13" fill="url(#badge-glow)" stroke="url(#badge-border)" />
+  <path d="M11 34c7.5 5.6 20.1 6 28 0" fill="none" stroke="#45d9f1" stroke-linecap="round" stroke-width="2.2" opacity=".42" />
+
+  <g filter="url(#soft-shadow)">
+    <path d="M13 12h22l4 8-13 17h-6L9 20z" fill="none" stroke="#edf4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.7" />
+    <path d="M13 12l10 25" fill="none" stroke="#9fb3cd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" />
+    <path d="M24 12l-1 25" fill="none" stroke="#9fb3cd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" />
+    <path d="M35 12 23 37" fill="none" stroke="#9fb3cd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" />
+    <path d="M18 34h12l3 5H16z" fill="url(#cork-fill)" stroke="#c8ff2e" stroke-linejoin="round" stroke-width="1.4" />
+  </g>
+</svg>

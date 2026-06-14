@@ -1,0 +1,71 @@
+<section class="panel insights-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Insights</p>
+      <h2>Shot profile</h2>
+    </div>
+    <svg lucideTarget [size]="22"></svg>
+  </div>
+
+  <div class="shot-bars">
+    @for (shot of store.playerStats().shotBreakdown; track shot.type) {
+      <div class="shot-row">
+        <div>
+          <strong>{{ shot.label }}</strong>
+          <span>{{ shot.points }} scoring {{ shot.points === 1 ? 'shot' : 'shots' }}</span>
+        </div>
+        <div class="bar-track" aria-hidden="true">
+          <span [style.width.%]="shot.share"></span>
+        </div>
+        <em>{{ shot.share }}%</em>
+      </div>
+    }
+  </div>
+
+  <div class="insight-split">
+    <div class="stat-tile">
+      <span>Opponent Mistake Points</span>
+      <strong>{{ store.playerStats().pointsFromOpponentMistakes }}</strong>
+    </div>
+    <div class="stat-tile warning">
+      <span>Mistakes Made</span>
+      <strong>{{ store.playerStats().mistakesMade }}</strong>
+    </div>
+  </div>
+
+  <div class="panel-subhead">
+    <p class="eyebrow">Player Ratings</p>
+    <h2>Leaderboard</h2>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Rating</th>
+          <th>W-L</th>
+          <th>Win %</th>
+          <th>Diff</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (entry of store.visibleLeaderboard(); track entry.playerName; let rank = $index) {
+          <tr [class.current-row]="entry.playerName === store.currentPlayerName()">
+            <td class="rank">#{{ rank + 1 }}</td>
+            <td>{{ entry.playerName }}</td>
+            <td>{{ entry.rating }}</td>
+            <td>{{ entry.wins }}-{{ entry.losses }}</td>
+            <td>{{ entry.winRate }}%</td>
+            <td [class.positive]="entry.pointDiff > 0">{{ entry.pointDiff | number: '1.0-0' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="table-empty">No completed matches yet.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

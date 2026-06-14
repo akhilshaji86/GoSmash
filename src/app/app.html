@@ -1,0 +1,38 @@
+<main class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <a class="profile-avatar" routerLink="/account" aria-label="Open account">
+        <span>{{ store.profileInitials() }}</span>
+      </a>
+      <div>
+        <h1>Hey {{ store.currentFirstName() }}</h1>
+        <p>Personal match intelligence</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Primary">
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <svg lucideLayoutDashboard [size]="18"></svg>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/create" routerLinkActive="active">
+      <svg lucideCirclePlus [size]="18"></svg>
+      <span>Games</span>
+    </a>
+    <a routerLink="/record" routerLinkActive="active">
+      <svg lucideClipboardList [size]="18"></svg>
+      <span>Record</span>
+    </a>
+    <a routerLink="/insights" routerLinkActive="active">
+      <svg lucideBarChart3 [size]="18"></svg>
+      <span>Insights</span>
+    </a>
+    <a routerLink="/account" routerLinkActive="active">
+      <svg lucideCircleUser [size]="18"></svg>
+      <span>Account</span>
+    </a>
+  </nav>
+
+  <router-outlet />
+</main>

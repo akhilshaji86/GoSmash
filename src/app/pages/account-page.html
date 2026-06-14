@@ -1,0 +1,35 @@
+<section class="panel account-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Account</p>
+      <h2>Player profile</h2>
+    </div>
+    <svg lucideCircleUser [size]="22"></svg>
+  </div>
+
+  <form [formGroup]="store.accountForm" (ngSubmit)="store.saveProfile()" class="match-form">
+    <label>
+      Player Name
+      <input formControlName="playerName" placeholder="Your display name" autocomplete="name" />
+    </label>
+
+    <label>
+      Email
+      <input formControlName="email" placeholder="you@example.com" autocomplete="email" />
+    </label>
+
+    <label>
+      Home Base
+      <input formControlName="homeBase" placeholder="Usual court or city" autocomplete="off" />
+    </label>
+
+    <button type="submit" class="primary-action">
+      <svg lucideCheck [size]="18"></svg>
+      Save profile
+    </button>
+
+    @if (store.profileSaved()) {
+      <div class="success-line">Profile saved</div>
+    }
+  </form>
+</section>

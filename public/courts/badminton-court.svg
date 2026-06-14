@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Badminton court">
+  <rect width="900" height="560" fill="#0b8d3b"/>
+  <rect x="64" y="76" width="772" height="408" fill="none" stroke="#eaffea" stroke-width="6"/>
+  <line x1="118" y1="76" x2="118" y2="484" stroke="#eaffea" stroke-width="6"/>
+  <line x1="782" y1="76" x2="782" y2="484" stroke="#eaffea" stroke-width="6"/>
+  <line x1="64" y1="112" x2="836" y2="112" stroke="#eaffea" stroke-width="6"/>
+  <line x1="64" y1="448" x2="836" y2="448" stroke="#eaffea" stroke-width="6"/>
+  <line x1="361" y1="76" x2="361" y2="484" stroke="#eaffea" stroke-width="6"/>
+  <line x1="539" y1="76" x2="539" y2="484" stroke="#eaffea" stroke-width="6"/>
+  <line x1="64" y1="280" x2="361" y2="280" stroke="#eaffea" stroke-width="6"/>
+  <line x1="539" y1="280" x2="836" y2="280" stroke="#eaffea" stroke-width="6"/>
+  <line x1="450" y1="76" x2="450" y2="484" stroke="#eaffea" stroke-width="6" stroke-dasharray="12 14"/>
+</svg>

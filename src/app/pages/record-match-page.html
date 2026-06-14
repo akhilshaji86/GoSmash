@@ -1,0 +1,341 @@
+<section class="panel score-panel wide-court" [class.rotated-court]="store.recordLayoutMode() === 'rotated'">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Record Match</p>
+      <h2>{{ store.activeMatch()?.location ?? 'No active match' }}</h2>
+      @if (store.activeMatch(); as headerMatch) {
+        <small class="match-set-label">{{ store.matchSetLabel(headerMatch) }}</small>
+      }
+    </div>
+    <div class="record-tools">
+      <div class="compact-toggle" aria-label="Scoring mode">
+        <button
+          type="button"
+          [class.active]="store.scoreMode() === 'quick'"
+          (click)="store.selectScoreMode('quick')"
+        >
+          Quick
+        </button>
+        <button
+          type="button"
+          [class.active]="store.scoreMode() === 'classic'"
+          (click)="store.selectScoreMode('classic')"
+        >
+          Classic
+        </button>
+      </div>
+      <button
+        type="button"
+        class="icon-btn"
+        [class.active]="store.recordLayoutMode() === 'rotated'"
+        title="Rotate scoring layout"
+        (click)="store.toggleRecordLayout()"
+      >
+        <svg lucideRotateCw [size]="18"></svg>
+      </button>
+      <svg lucideActivity [size]="22"></svg>
+    </div>
+  </div>
+
+  @if (store.activeMatch(); as match) {
+    @if (match.status === 'final' && match.winner) {
+      <div class="winner-banner" aria-live="polite">
+        <div class="winner-mark">
+          <svg lucideTrophy [size]="22"></svg>
+        </div>
+        <div>
+          <span>Match won</span>
+          <strong>{{ store.teamLabel(match, match.winner) }}</strong>
+        </div>
+      </div>
+    }
+
+    @if (store.scoreMode() === 'quick') {
+      <div class="quick-score-panel" aria-label="One tap scoring">
+        @for (group of store.quickScoreGroups(match); track group.side) {
+          <div class="quick-team-card" [class.team-a-quick]="group.side === 'teamA'" [class.team-b-quick]="group.side === 'teamB'">
+            <div class="quick-team-head">
+              <span>{{ group.label }}</span>
+              <strong>{{ group.score }}</strong>
+            </div>
+            <div class="quick-player-list">
+              @for (player of group.players; track player.side + player.playerName) {
+                <div class="quick-player-line">
+                  <div class="quick-player-meta">
+                    <span>{{ player.playerName }}</span>
+                    @if (player.role !== 'none') {
+                      <em>{{ player.role === 'server' ? 'Serving' : 'Receiving' }}</em>
+                    }
+                  </div>
+                  <div class="quick-shot-row">
+                    @for (option of store.quickScoreOptions; track option.type) {
+                      <button
+                        type="button"
+                        [title]="player.playerName + ' - ' + option.label"
+                        [attr.aria-label]="player.playerName + ' ' + option.label"
+                        [disabled]="store.isPointEntryLocked(match)"
+                        (click)="store.addQuickPoint(match.id, player.side, option.type, player.playerName)"
+                      >
+                        <app-shot-icon [type]="option.type"></app-shot-icon>
+                        <span class="sr-only">{{ option.label }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="point-context">
+        <div>
+          <span>Rally action</span>
+          <strong>{{ store.selectedPointLabel() }}</strong>
+        </div>
+        <div class="shot-grid">
+          @for (shot of store.shotOptions; track shot.type) {
+            <button
+              type="button"
+              [title]="shot.label"
+              [attr.aria-label]="shot.label"
+              [class.active]="store.selectedShotType() === shot.type"
+              (click)="store.selectShot(shot.type)"
+            >
+              <app-shot-icon [type]="shot.type"></app-shot-icon>
+              <span class="sr-only">{{ shot.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="badminton-court" [class.final]="match.status === 'final'" [class.singles]="match.format === 'singles'">
+      <div class="court-total-score" aria-label="Current match score">
+        <strong class="team-a-total">{{ match.teamAScore }}</strong>
+        <span>-</span>
+        <strong class="team-b-total">{{ match.teamBScore }}</strong>
+      </div>
+
+      <div class="court-surface" role="group" aria-label="Badminton court scorer">
+        <div
+          class="court-half team-a"
+          [class.server-top]="store.laneRole(match, 'teamA', 'top') === 'server'"
+          [class.server-bottom]="store.laneRole(match, 'teamA', 'bottom') === 'server'"
+          [class.receiver-top]="store.laneRole(match, 'teamA', 'top') === 'receiver'"
+          [class.receiver-bottom]="store.laneRole(match, 'teamA', 'bottom') === 'receiver'"
+        >
+          @for (player of store.courtPlayers(match, 'teamA'); track player.playerName + player.serviceCourt) {
+            <button
+              type="button"
+              class="court-player"
+              [class.lane-top]="player.visualLane === 'top'"
+              [class.lane-bottom]="player.visualLane === 'bottom'"
+              [class.server-box]="player.role === 'server'"
+              [class.receiver-box]="player.role === 'receiver'"
+              [disabled]="store.isPointEntryLocked(match)"
+              (click)="store.addPoint(match.id, 'teamA', player.playerName)"
+            >
+              <strong>{{ player.playerName }}</strong>
+              @if (player.role !== 'none') {
+                <em>{{ player.role === 'server' ? 'Serve' : 'Receive' }}</em>
+              }
+            </button>
+          }
+        </div>
+
+        <div
+          class="court-half team-b"
+          [class.server-top]="store.laneRole(match, 'teamB', 'top') === 'server'"
+          [class.server-bottom]="store.laneRole(match, 'teamB', 'bottom') === 'server'"
+          [class.receiver-top]="store.laneRole(match, 'teamB', 'top') === 'receiver'"
+          [class.receiver-bottom]="store.laneRole(match, 'teamB', 'bottom') === 'receiver'"
+        >
+          @for (player of store.courtPlayers(match, 'teamB'); track player.playerName + player.serviceCourt) {
+            <button
+              type="button"
+              class="court-player"
+              [class.lane-top]="player.visualLane === 'top'"
+              [class.lane-bottom]="player.visualLane === 'bottom'"
+              [class.server-box]="player.role === 'server'"
+              [class.receiver-box]="player.role === 'receiver'"
+              [disabled]="store.isPointEntryLocked(match)"
+              (click)="store.addPoint(match.id, 'teamB', player.playerName)"
+            >
+              <strong>{{ player.playerName }}</strong>
+              @if (player.role !== 'none') {
+                <em>{{ player.role === 'server' ? 'Serve' : 'Receive' }}</em>
+              }
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <div class="score-actions">
+      <button type="button" (click)="store.undo(match.id)" [disabled]="match.pointEvents.length === 0">
+        <svg lucideUndo2 [size]="17"></svg>
+        Undo
+      </button>
+      <button type="button" class="finish" (click)="store.openEndGameDialog(match.id)" [disabled]="match.status === 'final'">
+        <svg lucideCheck [size]="17"></svg>
+        End game
+      </button>
+      <button type="button" class="danger" (click)="store.deleteMatch(match.id)">
+        <svg lucideTrash2 [size]="17"></svg>
+        Delete
+      </button>
+    </div>
+
+    <div class="event-strip">
+      @for (event of match.pointEvents.slice(-10); track event.id) {
+        <span [class.a]="event.side === 'teamA'" [class.b]="event.side === 'teamB'" [title]="store.eventLabel(match, event)">
+          {{ event.teamAScore }}-{{ event.teamBScore }}
+        </span>
+      } @empty {
+        <span class="empty">No points yet</span>
+      }
+    </div>
+
+    @if (store.completionMatch(); as completeMatch) {
+      <div class="completion-backdrop" role="dialog" aria-modal="true" aria-labelledby="completion-title">
+        <div class="completion-card">
+          <div class="completion-head">
+            <div class="winner-mark">
+              <svg lucideTrophy [size]="22"></svg>
+            </div>
+            <div>
+              <p class="eyebrow">{{ store.completionEyebrow(completeMatch) }}</p>
+              <h2 id="completion-title">{{ store.completionTitle(completeMatch) }}</h2>
+              <strong class="completion-score">{{ completeMatch.teamAScore }}-{{ completeMatch.teamBScore }}</strong>
+            </div>
+          </div>
+
+          @if (!store.canFinalize(completeMatch)) {
+            <p class="completion-note">
+              This score is not complete under badminton rules. Ending now saves the current score for stats; the leading side is used for leaderboard ranking.
+            </p>
+          }
+
+          @if (!store.replayPickerOpen()) {
+            <div class="completion-actions">
+              <button type="button" class="primary-action" (click)="store.endGame(completeMatch.id)">
+                <svg lucideCheck [size]="18"></svg>
+                End game
+              </button>
+              @if (store.canFinalize(completeMatch)) {
+                <button type="button" (click)="store.startNextSet(completeMatch.id)">
+                  <svg lucideLayers2 [size]="18"></svg>
+                  Add next set
+                </button>
+              }
+              <button type="button" (click)="store.startSamePlayersRematch(completeMatch.id)">
+                <svg lucideRotateCw [size]="18"></svg>
+                {{ completeMatch.format === 'doubles' ? 'Rematch same teams' : 'Rematch' }}
+              </button>
+              <button type="button" (click)="store.openReplayPicker(completeMatch)">
+                <svg lucideUsers [size]="18"></svg>
+                New match from group
+              </button>
+              <button type="button" class="muted-action" (click)="store.undo(completeMatch.id)">
+                <svg lucideUndo2 [size]="18"></svg>
+                Undo last point
+              </button>
+              @if (!store.canFinalize(completeMatch)) {
+                <button type="button" class="muted-action" (click)="store.closeEndGameDialog()">
+                  Continue match
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="completion-picker">
+              <div class="completion-picker-head">
+                <button type="button" class="icon-btn" title="Back" (click)="store.closeReplayPicker()">
+                  <svg lucideArrowLeft [size]="18"></svg>
+                </button>
+                <div>
+                  <p class="eyebrow">New match</p>
+                  <strong>Choose from approved group</strong>
+                </div>
+              </div>
+
+              <div class="player-pickers replay-pickers">
+                <div class="side-picker">
+                  <div class="side-picker-head">
+                    <span>Serving side</span>
+                    <strong>{{ store.replaySidePlayers('replayTeamAPlayers').length }}/{{ store.replayPlayerLimit(completeMatch) }}</strong>
+                  </div>
+                  <div class="selected-player-row">
+                    @for (player of store.replaySidePlayers('replayTeamAPlayers'); track player) {
+                      <button type="button" class="selected-player" (click)="store.removeReplayPlayer('replayTeamAPlayers', player)">
+                        {{ player }} x
+                      </button>
+                    } @empty {
+                      <span class="empty-pill">Pick server</span>
+                    }
+                  </div>
+                  <div class="registered-player-grid">
+                    @for (player of store.replayPlayerPool(completeMatch); track player) {
+                      <button
+                        type="button"
+                        [class.active]="store.isReplayPlayerSelected('replayTeamAPlayers', player)"
+                        [disabled]="store.isReplayPlayerUnavailable('replayTeamAPlayers', player)"
+                        (click)="store.toggleReplayPlayer('replayTeamAPlayers', player, completeMatch)"
+                      >
+                        {{ player }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="side-picker">
+                  <div class="side-picker-head">
+                    <span>Receiving side</span>
+                    <strong>{{ store.replaySidePlayers('replayTeamBPlayers').length }}/{{ store.replayPlayerLimit(completeMatch) }}</strong>
+                  </div>
+                  <div class="selected-player-row">
+                    @for (player of store.replaySidePlayers('replayTeamBPlayers'); track player) {
+                      <button type="button" class="selected-player" (click)="store.removeReplayPlayer('replayTeamBPlayers', player)">
+                        {{ player }} x
+                      </button>
+                    } @empty {
+                      <span class="empty-pill">Pick receiver</span>
+                    }
+                  </div>
+                  <div class="registered-player-grid">
+                    @for (player of store.replayPlayerPool(completeMatch); track player) {
+                      <button
+                        type="button"
+                        [class.active]="store.isReplayPlayerSelected('replayTeamBPlayers', player)"
+                        [disabled]="store.isReplayPlayerUnavailable('replayTeamBPlayers', player)"
+                        (click)="store.toggleReplayPlayer('replayTeamBPlayers', player, completeMatch)"
+                      >
+                        {{ player }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="primary-action"
+                [disabled]="!store.canStartNewMatchFromGroup(completeMatch)"
+                (click)="store.startNewMatchFromGroup(completeMatch.id)"
+              >
+                <svg lucideCirclePlus [size]="18"></svg>
+                Start new match
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="empty-state">
+      <svg lucideTrophy [size]="32"></svg>
+      <strong>No active match</strong>
+    </div>
+  }
+</section>
