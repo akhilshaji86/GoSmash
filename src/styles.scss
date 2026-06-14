@@ -948,31 +948,31 @@ select:focus {
 }
 
 .shot-icon-smash {
-  --shot-mask: url("/icons/shots/smash.png");
+  --shot-mask: url("../public/icons/shots/smash.png");
 }
 
 .shot-icon-drop {
-  --shot-mask: url("/icons/shots/drop.png");
+  --shot-mask: url("../public/icons/shots/drop.png");
 }
 
 .shot-icon-clear {
-  --shot-mask: url("/icons/shots/clear.png");
+  --shot-mask: url("../public/icons/shots/clear.png");
 }
 
 .shot-icon-net {
-  --shot-mask: url("/icons/shots/net.png");
+  --shot-mask: url("../public/icons/shots/net.png");
 }
 
 .shot-icon-trick {
-  --shot-mask: url("/icons/shots/trick.png");
+  --shot-mask: url("../public/icons/shots/trick.png");
 }
 
 .shot-icon-fault {
-  --shot-mask: url("/icons/shots/fault.png");
+  --shot-mask: url("../public/icons/shots/fault.png");
 }
 
 .shot-icon-lob {
-  --shot-mask: url("/icons/shots/trick.png");
+  --shot-mask: url("../public/icons/shots/trick.png");
 }
 
 .quick-shot-row button:has(.shot-icon-fault) {
@@ -1328,7 +1328,7 @@ select:focus {
   border-radius: 8px;
   background:
     linear-gradient(90deg, rgba(6, 16, 29, 0.18), rgba(6, 16, 29, 0.04), rgba(6, 16, 29, 0.18)),
-    url("/courts/badminton-court.svg") center / 100% 100% no-repeat,
+    url("../public/courts/badminton-court.svg") center / 100% 100% no-repeat,
     #0b8d3b;
   box-shadow: inset 0 0 0 1px rgba(6, 16, 29, 0.22);
 }
