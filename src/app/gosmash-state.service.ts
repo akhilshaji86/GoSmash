@@ -76,7 +76,8 @@ export class GosmashStateService {
   readonly quickScoreOptions: readonly QuickScoreOption[] = SHOT_OPTIONS;
   readonly selectedMatchId = signal<string | null>(null);
   readonly selectedGameId = signal<string | null>(null);
-  readonly gameLocationFilter = signal(this.initialProfile.homeBase || DEFAULT_LOCATION);
+  readonly gameLocationFilter = signal<string | null>(null);
+  readonly showGameFilters = signal(false);
   readonly selectedShotType = signal<ShotType | null>(null);
   readonly scoreMode = signal<ScoreMode>(loadScoreMode(this.storage));
   readonly recordLayoutMode = signal<RecordLayoutMode>(loadRecordLayoutMode(this.storage));
@@ -159,19 +160,22 @@ export class GosmashStateService {
 
   readonly gameLocations = computed(() => {
     const locations = new Set<string>();
-    locations.add(this.initialProfile.homeBase || DEFAULT_LOCATION);
-    for (const game of this.state().games) locations.add(game.location);
-    for (const match of this.state().matches) locations.add(match.location);
+    for (const game of this.state().games) {
+      if (game.status === 'open' || game.status === 'full') {
+        locations.add(game.location);
+      }
+    }
     return [...locations].filter(Boolean).sort((a, b) => a.localeCompare(b));
   });
 
-  readonly localGames = computed(() => {
-    const selectedLocation = this.gameLocationFilter().toLowerCase();
+  readonly visibleGames = computed(() => {
+    const selectedLocation = this.gameLocationFilter()?.toLowerCase() ?? null;
     return this.state()
-      .games.filter(
-        (game) =>
-          (game.status === 'open' || game.status === 'full') && game.location.toLowerCase() === selectedLocation,
-      )
+      .games.filter((game) => {
+        if (game.status !== 'open' && game.status !== 'full') return false;
+        if (!selectedLocation) return true;
+        return game.location.toLowerCase() === selectedLocation;
+      })
       .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
   });
 
@@ -179,9 +183,18 @@ export class GosmashStateService {
     const selected = this.selectedGameId();
     return (
       this.state().games.find((game) => game.id === selected && (game.status === 'open' || game.status === 'full')) ??
-      this.localGames()[0] ??
+      this.visibleGames()[0] ??
       null
     );
+  });
+
+  readonly hasStartableGame = computed(() => {
+    const currentPlayer = this.currentPlayerName().toLowerCase();
+    return this.state().games.some((game) => {
+      if (game.status !== 'open' && game.status !== 'full') return false;
+      if (game.hostName.toLowerCase() === currentPlayer) return true;
+      return this.isPlayerInList(game.approvedPlayers, this.currentPlayerName());
+    });
   });
 
   readonly selectedGameTitle = computed(() => this.selectedGame()?.location ?? 'New match');
@@ -242,12 +255,18 @@ export class GosmashStateService {
     this.trimMatchPlayers('teamBPlayers');
   }
 
-  selectGameLocation(location: string): void {
+  toggleGameFilters(): void {
+    this.showGameFilters.update((value) => !value);
+  }
+
+  selectGameLocation(location: string | null): void {
     this.gameLocationFilter.set(location);
     const firstGame = this.state()
-      .games.filter(
-        (game) => (game.status === 'open' || game.status === 'full') && game.location.toLowerCase() === location.toLowerCase(),
-      )
+      .games.filter((game) => {
+        if (game.status !== 'open' && game.status !== 'full') return false;
+        if (!location) return true;
+        return game.location.toLowerCase() === location.toLowerCase();
+      })
       .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))[0];
 
     if (firstGame) {
@@ -339,7 +358,6 @@ export class GosmashStateService {
       hostName: this.currentPlayerName(),
     });
 
-    this.gameLocationFilter.set(game.location);
     this.createGameFormOpen.set(false);
     this.selectGame(game.id);
   }

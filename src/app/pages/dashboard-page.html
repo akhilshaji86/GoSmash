@@ -23,30 +23,21 @@
       <span>Win Rate</span>
       <strong>{{ store.playerStats().winRate }}%</strong>
     </div>
-    <div class="metric warning">
-      <span>Mistakes</span>
-      <strong>{{ store.playerStats().mistakeRate }}%</strong>
+    <div class="metric">
+      <span>Best Shot</span>
+      <strong class="metric-text">{{ store.playerStats().favoriteShot }}</strong>
     </div>
   </section>
 
-  <div class="stat-grid">
-    <div class="stat-tile">
-      <span>Points For</span>
-      <strong>{{ store.playerStats().pointsFor }}</strong>
+  <section class="mistake-progress" aria-label="Mistake rate">
+    <div class="mistake-progress-head">
+      <span>Mistakes</span>
+      <strong>{{ store.playerStats().mistakeRate }}%</strong>
     </div>
-    <div class="stat-tile">
-      <span>Points Against</span>
-      <strong>{{ store.playerStats().pointsAgainst }}</strong>
+    <div class="bar-track" aria-hidden="true">
+      <span [style.width.%]="store.playerStats().mistakeRate"></span>
     </div>
-    <div class="stat-tile">
-      <span>Point Diff</span>
-      <strong [class.positive]="store.playerStats().pointDiff > 0">{{ store.playerStats().pointDiff }}</strong>
-    </div>
-    <div class="stat-tile">
-      <span>Best Shot</span>
-      <strong>{{ store.playerStats().favoriteShot }}</strong>
-    </div>
-  </div>
+  </section>
 
   <div class="suggestion-box">
     <div class="suggestion-head">
@@ -70,16 +61,20 @@
 
   <div class="match-list">
     @for (match of store.recentMatches(); track match.id) {
-      <article class="match-row" [class.live]="match.status === 'recording'">
+      <button type="button" class="match-row match-link" [class.live]="match.status === 'recording'" (click)="openMatchInsights(match.id)">
         <div>
           <strong>{{ store.teamLabel(match, 'teamA') }} vs {{ store.teamLabel(match, 'teamB') }}</strong>
-          <span>{{ match.location }} &middot; {{ match.format | titlecase }} &middot; {{ match.playedAt | date: 'mediumDate' }}</span>
+          <span>{{ match.location }} &middot; {{ match.playedAt | date: 'mediumDate' }}</span>
+          <div class="format-tag-group history-format-tags" aria-label="Match format">
+            <span class="format-tag" [class.active]="match.format === 'singles'">Singles</span>
+            <span class="format-tag" [class.active]="match.format === 'doubles'">Doubles</span>
+          </div>
         </div>
         <div class="match-score">
           <strong>{{ match.teamAScore }}-{{ match.teamBScore }}</strong>
           <span>{{ match.status }}</span>
         </div>
-      </article>
+      </button>
     } @empty {
       <div class="empty-line">No matches recorded.</div>
     }

@@ -8,6 +8,7 @@
       }
     </div>
     <div class="record-tools">
+      @if (store.activeMatch()) {
       <div class="compact-toggle" aria-label="Scoring mode">
         <button
           type="button"
@@ -24,6 +25,7 @@
           Classic
         </button>
       </div>
+      }
       <button
         type="button"
         class="icon-btn"

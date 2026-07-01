@@ -2,13 +2,28 @@
   <div class="panel-head">
     <div>
       <p class="eyebrow">Insights</p>
-      <h2>Shot profile</h2>
+      @if (selectedMatch(); as match) {
+        <div class="analysis-head-row">
+          <h2>Match analysis</h2>
+          <strong class="analysis-head-score">{{ match.teamAScore }}-{{ match.teamBScore }}</strong>
+        </div>
+      } @else {
+        <h2>Shot profile</h2>
+      }
     </div>
     <svg lucideTarget [size]="22"></svg>
   </div>
 
+  @if (selectedMatch(); as match) {
+    <div class="success-line insights-focus-line">
+      <span>
+        {{ store.teamLabel(match, 'teamA') }} vs {{ store.teamLabel(match, 'teamB') }}
+      </span>
+    </div>
+  }
+
   <div class="shot-bars">
-    @for (shot of store.playerStats().shotBreakdown; track shot.type) {
+    @for (shot of activeInsightsStats().shotBreakdown; track shot.type) {
       <div class="shot-row">
         <div>
           <strong>{{ shot.label }}</strong>
@@ -25,11 +40,11 @@
   <div class="insight-split">
     <div class="stat-tile">
       <span>Opponent Mistake Points</span>
-      <strong>{{ store.playerStats().pointsFromOpponentMistakes }}</strong>
+      <strong>{{ activeInsightsStats().pointsFromOpponentMistakes }}</strong>
     </div>
     <div class="stat-tile warning">
       <span>Mistakes Made</span>
-      <strong>{{ store.playerStats().mistakesMade }}</strong>
+      <strong>{{ activeInsightsStats().mistakesMade }}</strong>
     </div>
   </div>
 

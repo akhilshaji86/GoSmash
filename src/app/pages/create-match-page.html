@@ -1,159 +1,34 @@
 <section class="panel create-panel">
   <div class="panel-head">
     <div>
-      <p class="eyebrow">Games</p>
-      <h2>Find or host a game</h2>
-    </div>
-    <div class="panel-actions">
-      @if (store.hostedPendingRequestCount() > 0) {
-        <a class="notification-link" href="#join-requests">
-          {{ store.hostedPendingRequestCount() }}
-        </a>
-      }
-      <button type="button" class="ghost-action" (click)="store.openCreateGameForm()">
-        <svg lucideCirclePlus [size]="16"></svg>
-        Create game
-      </button>
-      <button type="button" class="icon-btn" title="Reset demo data" (click)="store.resetDemoData()">
-        <svg lucideRotateCcw [size]="18"></svg>
-      </button>
-    </div>
-  </div>
-
-  @if (store.createGameFormOpen()) {
-    <form [formGroup]="store.gameForm" (ngSubmit)="store.createGame()" class="game-form">
-      <label>
-        Location
-        <input formControlName="location" placeholder="Court, club, or locality" autocomplete="off" />
-      </label>
-
-      <label>
-        Players needed
-        <input type="number" min="2" max="20" formControlName="playersRequired" />
-      </label>
-
-      <label>
-        Time of play
-        <input type="datetime-local" formControlName="scheduledAt" />
-      </label>
-
-      <div class="form-actions">
-        <button type="submit" class="primary-action">
-          <svg lucideCirclePlus [size]="18"></svg>
-          Host game
-        </button>
-        <button type="button" class="ghost-action" (click)="store.closeCreateGameForm()">Cancel</button>
-      </div>
-    </form>
-  }
-
-  <div class="game-browser">
-    <div>
-      <p class="eyebrow">Locality</p>
-      <select
-        [ngModel]="store.gameLocationFilter()"
-        (ngModelChange)="store.selectGameLocation($event)"
-        [ngModelOptions]="{ standalone: true }"
-        aria-label="Locality"
-      >
-        @for (location of store.gameLocations(); track location) {
-          <option [value]="location">{{ location }}</option>
-        }
-      </select>
-    </div>
-
-    <div class="game-list">
-      @for (game of store.localGames(); track game.id) {
-        <article class="game-card" [class.active]="store.isSelectedGame(game.id)">
-          <button type="button" class="game-main" (click)="store.selectGame(game.id)">
-            <span>{{ game.location }}</span>
-            <strong>{{ game.scheduledAt | date: 'EEE, d MMM, h:mm a' }}</strong>
-            <small>
-              Hosted by {{ game.hostName }} · {{ store.approvedSlotsLabel(game.id) }} approved · {{ game.status }}
-            </small>
-          </button>
-
-          <div class="approved-strip">
-            @for (player of game.approvedPlayers; track player) {
-              <span>{{ player }}</span>
-            }
-          </div>
-
-          @if (store.isGameHost(game.id)) {
-            @if (store.pendingRequests(game.id).length > 0) {
-              <a class="request-link" href="#join-requests">{{ store.pendingRequests(game.id).length }} request pending</a>
-            } @else {
-              <small class="quiet-line">No pending requests</small>
-            }
-            <div class="host-game-actions">
-              @if (game.status === 'open') {
-                <button type="button" (click)="store.markGameFull(game.id)">Mark full</button>
-              } @else if (game.status === 'full') {
-                <button type="button" (click)="store.reopenGame(game.id)">Reopen</button>
-              }
-              <button type="button" class="muted-action" (click)="store.cancelGame(game.id)">Cancel game</button>
-            </div>
-          } @else if (store.isApprovedForGame(game.id)) {
-            <div class="success-line">You are approved for this game.</div>
-          } @else if (store.pendingRequestForCurrentPlayer(game.id)) {
-            <div class="success-line">Join request sent.</div>
-            <button type="button" class="join-action muted-action" (click)="store.cancelJoinRequest(game.id)">Cancel request</button>
-          } @else {
-            <button type="button" class="join-action" [disabled]="game.status !== 'open'" (click)="store.requestToJoinGame(game.id)">
-              {{ game.status === 'full' ? 'Game full' : 'Request to join' }}
-            </button>
-          }
-        </article>
-      } @empty {
-        <div class="empty-line">No open games in this locality yet.</div>
-      }
-    </div>
-  </div>
-
-  @if (store.hostedPendingRequestCount() > 0) {
-    <div id="join-requests" class="request-center">
-      <div class="panel-subhead">
-        <p class="eyebrow">Requests</p>
-        <h2>Approve players</h2>
-      </div>
-
-      <div class="request-card-list">
-        @for (item of store.hostedPendingRequests(); track item.request.id) {
-          <article class="request-card">
-            <div>
-              <strong>{{ item.request.playerName }}</strong>
-              <span>{{ item.game.location }} · {{ item.game.scheduledAt | date: 'EEE, d MMM, h:mm a' }}</span>
-            </div>
-            <input
-              [value]="store.decisionNote(item.request.id)"
-              (input)="store.setDecisionNote(item.request.id, $any($event.target).value)"
-              placeholder="Note for this player (optional)"
-            />
-            <div class="request-actions">
-              <button type="button" (click)="store.approveJoinRequest(item.game.id, item.request.id)">Approve</button>
-              <button type="button" class="muted-action" (click)="store.declineJoinRequest(item.game.id, item.request.id)">Reject</button>
-            </div>
-          </article>
-        }
-      </div>
-    </div>
-  }
-
-  @if (store.formError(); as error) {
-    <div class="form-error">{{ error }}</div>
-  }
-</section>
-
-<section class="panel create-panel">
-  <div class="panel-head">
-    <div>
       <p class="eyebrow">Start Match</p>
       <h2>{{ store.selectedGameTitle() }}</h2>
     </div>
   </div>
 
   @if (store.selectedGame(); as selectedGame) {
+    <div class="success-line">Selected: {{ selectedGame.location }} · {{ selectedGame.scheduledAt | date: 'EEE, d MMM, h:mm a' }}</div>
+  } @else {
+    <div class="empty-line">Select a game from the Games section to start.</div>
+  }
+
+  @if (!startMatchExpanded()) {
+    <button
+      type="button"
+      class="primary-action"
+      (click)="expandStartMatch()"
+      [disabled]="!store.selectedGame() || !store.canStartGame(store.selectedGame()!.id)"
+    >
+      Start game
+    </button>
+  }
+
+  @if (startMatchExpanded()) {
+  @if (store.selectedGame(); as selectedGame) {
   @if (store.canStartGame(selectedGame.id)) {
+  <div class="panel-actions">
+    <button type="button" class="ghost-action" (click)="collapseStartMatch()">Hide details</button>
+  </div>
   <form [formGroup]="store.matchForm" (ngSubmit)="createMatch()" class="match-form">
     <div class="segmented">
       <button
@@ -171,13 +46,6 @@
         Doubles
       </button>
     </div>
-
-    <label>
-      Place
-      <input formControlName="location" placeholder="Court, club, or city" autocomplete="off" />
-    </label>
-
-    <div class="success-line">Starting from {{ selectedGame.approvedPlayers.length }} approved players in this hosted game.</div>
 
     <div class="player-pickers">
       <div class="side-picker">
@@ -294,5 +162,166 @@
   }
   } @else {
     <div class="empty-line">Select or host a game first, then start a match from its approved players.</div>
+  }
+  }
+</section>
+
+<section class="panel create-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Games</p>
+      <h2>Find or host a game</h2>
+    </div>
+    <div class="panel-actions">
+      @if (store.hostedPendingRequestCount() > 0) {
+        <a class="notification-link" href="#join-requests">
+          {{ store.hostedPendingRequestCount() }}
+        </a>
+      }
+      <button
+        type="button"
+        class="icon-btn"
+        title="Toggle filters"
+        [class.active]="store.showGameFilters()"
+        (click)="store.toggleGameFilters()"
+      >
+        <svg lucideFilter [size]="18"></svg>
+      </button>
+      <button type="button" class="ghost-action" (click)="store.openCreateGameForm()">
+        <svg lucideCirclePlus [size]="16"></svg>
+        <span>New game</span>
+      </button>
+      <button type="button" class="icon-btn" title="Reset demo data" (click)="store.resetDemoData()">
+        <svg lucideRotateCcw [size]="18"></svg>
+      </button>
+    </div>
+  </div>
+
+  @if (store.createGameFormOpen()) {
+    <form [formGroup]="store.gameForm" (ngSubmit)="store.createGame()" class="game-form">
+      <label>
+        Location
+        <input formControlName="location" placeholder="Court, club, or locality" autocomplete="off" />
+      </label>
+
+      <label>
+        Players needed
+        <input type="number" min="2" max="20" formControlName="playersRequired" />
+      </label>
+
+      <label>
+        Time of play
+        <input type="datetime-local" formControlName="scheduledAt" />
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-action">
+          <svg lucideCirclePlus [size]="18"></svg>
+          Host game
+        </button>
+        <button type="button" class="ghost-action" (click)="store.closeCreateGameForm()">Cancel</button>
+      </div>
+    </form>
+  }
+
+  <div class="game-browser">
+    @if (store.showGameFilters()) {
+      <div class="game-filter-panel">
+        <div>
+          <p class="eyebrow">Filter by locality</p>
+          <select
+            [ngModel]="store.gameLocationFilter()"
+            (ngModelChange)="store.selectGameLocation($event || null)"
+            [ngModelOptions]="{ standalone: true }"
+            aria-label="Filter games by locality"
+          >
+            <option [ngValue]="null">All localities</option>
+            @for (location of store.gameLocations(); track location) {
+              <option [ngValue]="location">{{ location }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+    <div class="game-list">
+      @for (game of store.visibleGames(); track game.id) {
+        <article class="game-card" [class.active]="store.isSelectedGame(game.id)">
+          <button type="button" class="game-main" (click)="selectGameForStart(game.id)">
+            <span>{{ game.location }}</span>
+            <strong>{{ game.scheduledAt | date: 'EEE, d MMM, h:mm a' }}</strong>
+            <small>
+              Hosted by {{ game.hostName }} · {{ store.approvedSlotsLabel(game.id) }} approved · {{ game.status }}
+            </small>
+          </button>
+
+          <div class="approved-strip">
+            @for (player of game.approvedPlayers; track player) {
+              <span>{{ player }}</span>
+            }
+          </div>
+
+          @if (store.isGameHost(game.id)) {
+            @if (store.pendingRequests(game.id).length > 0) {
+              <a class="request-link" href="#join-requests">{{ store.pendingRequests(game.id).length }} request pending</a>
+            } @else {
+              <small class="quiet-line">No pending requests</small>
+            }
+            <div class="host-game-actions">
+              @if (game.status === 'open') {
+                <button type="button" (click)="store.markGameFull(game.id)">Mark full</button>
+              } @else if (game.status === 'full') {
+                <button type="button" (click)="store.reopenGame(game.id)">Reopen</button>
+              }
+              <button type="button" class="muted-action" (click)="store.cancelGame(game.id)">Cancel game</button>
+            </div>
+          } @else if (store.isApprovedForGame(game.id)) {
+            <div class="success-line">You are approved for this game.</div>
+          } @else if (store.pendingRequestForCurrentPlayer(game.id)) {
+            <div class="success-line">Join request sent.</div>
+            <button type="button" class="join-action muted-action" (click)="store.cancelJoinRequest(game.id)">Cancel request</button>
+          } @else {
+            <button type="button" class="join-action" [disabled]="game.status !== 'open'" (click)="store.requestToJoinGame(game.id)">
+              {{ game.status === 'full' ? 'Game full' : 'Request to join' }}
+            </button>
+          }
+        </article>
+      } @empty {
+        <div class="empty-line">No open games right now.</div>
+      }
+    </div>
+  </div>
+
+  @if (store.hostedPendingRequestCount() > 0) {
+    <div id="join-requests" class="request-center">
+      <div class="panel-subhead">
+        <p class="eyebrow">Requests</p>
+        <h2>Approve players</h2>
+      </div>
+
+      <div class="request-card-list">
+        @for (item of store.hostedPendingRequests(); track item.request.id) {
+          <article class="request-card">
+            <div>
+              <strong>{{ item.request.playerName }}</strong>
+              <span>{{ item.game.location }} · {{ item.game.scheduledAt | date: 'EEE, d MMM, h:mm a' }}</span>
+            </div>
+            <input
+              [value]="store.decisionNote(item.request.id)"
+              (input)="store.setDecisionNote(item.request.id, $any($event.target).value)"
+              placeholder="Note for this player (optional)"
+            />
+            <div class="request-actions">
+              <button type="button" (click)="store.approveJoinRequest(item.game.id, item.request.id)">Approve</button>
+              <button type="button" class="muted-action" (click)="store.declineJoinRequest(item.game.id, item.request.id)">Reject</button>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  }
+
+  @if (store.formError(); as error) {
+    <div class="form-error">{{ error }}</div>
   }
 </section>
